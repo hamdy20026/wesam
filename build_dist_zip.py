@@ -1,16 +1,18 @@
 import os
+import sys
 import shutil
 import subprocess
 import zipfile
 
-def prepare_dist_and_build_zip():
-    print("--- 1. Running Vite build (npm run build) ---")
-    try:
-        subprocess.run(['npm', 'run', 'build'], check=True)
-        print("Vite production build completed successfully.")
-    except Exception as e:
-        print("Error during npm run build:", e)
-        raise
+def prepare_dist_and_build_zip(skip_vite=False):
+    if not skip_vite:
+        print("--- 1. Running Vite build (npx vite build) ---")
+        try:
+            subprocess.run(['npx', 'vite', 'build'], check=True)
+            print("Vite production build completed successfully.")
+        except Exception as e:
+            print("Error during vite build:", e)
+            raise
 
     # Clean up chat screenshot attachments from dist/assets if Vite copied them from public
     aistudio_in_dist = os.path.join('dist', 'assets', 'aistudio')
@@ -19,9 +21,10 @@ def prepare_dist_and_build_zip():
         print("Cleaned up chat attachments from dist/assets.")
 
     # Remove any existing zip archives inside dist so we don't zip previous zips
-    for f in os.listdir('dist'):
-        if f.endswith('.zip'):
-            os.remove(os.path.join('dist', f))
+    if os.path.exists('dist'):
+        for f in os.listdir('dist'):
+            if f.endswith('.zip'):
+                os.remove(os.path.join('dist', f))
 
     # --- 2. Copy PHP API files into dist/api ---
     os.makedirs(os.path.join('dist', 'api'), exist_ok=True)
@@ -103,7 +106,6 @@ if (file_exists(__DIR__ . '/index.html')) {
     print(f"--- 8. Creating zip archive: {zip_filename} ---")
     with zipfile.ZipFile(zip_filename, 'w', zipfile.ZIP_DEFLATED) as zipf:
         for root, dirs, files in os.walk('dist'):
-            # Don't include any accidental zip inside dist
             for file in files:
                 if file.endswith('.zip'):
                     continue
@@ -111,25 +113,24 @@ if (file_exists(__DIR__ . '/index.html')) {
                 rel_path = os.path.relpath(file_path, 'dist')
                 zipf.write(file_path, rel_path)
 
-    # Replicate zip to all required locations
+    # Replicate zip to root and public so in-app download buttons work seamlessly
     shutil.copyfile(zip_filename, 'dist.zip')
     
     os.makedirs('public', exist_ok=True)
     shutil.copyfile(zip_filename, os.path.join('public', zip_filename))
     shutil.copyfile(zip_filename, os.path.join('public', 'dist.zip'))
 
-    shutil.copyfile(zip_filename, os.path.join('dist', zip_filename))
-    shutil.copyfile(zip_filename, os.path.join('dist', 'dist.zip'))
-
     zip_size_mb = os.path.getsize(zip_filename) / (1024 * 1024)
-    print(f"SUCCESS: Complete dist package created cleanly! Size: {zip_size_mb:.2f} MB")
+    print(f"SUCCESS: Complete dist folder & zip package created cleanly! Size: {zip_size_mb:.2f} MB")
     
     # Print root files inside the zip for verification
     with zipfile.ZipFile(zip_filename, 'r') as zf:
         names = zf.namelist()
         root_entries = sorted(set([n.split('/')[0] for n in names]))
-        print(f"Total files in archive: {len(names)}")
-        print(f"Top-level archive entries: {root_entries}")
+        print(f"Total files in dist & archive: {len(names)}")
+        print(f"Top-level dist entries: {root_entries}")
 
 if __name__ == '__main__':
-    prepare_dist_and_build_zip()
+    skip = '--skip-vite' in sys.argv
+    prepare_dist_and_build_zip(skip_vite=skip)
+
