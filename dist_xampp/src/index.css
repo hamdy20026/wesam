@@ -1,0 +1,112 @@
+@import url('https://fonts.googleapis.com/css2?family=Almarai:wght@400;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Almarai', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-almarai: 'Almarai', sans-serif;
+
+  /* Animation overrides */
+  --animate-spin-slow: spin 8s linear infinite;
+}
+
+@layer base {
+  *, ::before, ::after {
+    font-family: 'Almarai', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-weight: 700;
+  }
+
+  html {
+    font-family: 'Almarai', system-ui, sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-tap-highlight-color: transparent;
+    background-color: #f1f5f9;
+  }
+
+  @media (min-width: 640px) {
+    html {
+      font-size: 15px; /* Harmonious standard baseline scale on tablet & desktop */
+    }
+  }
+
+  body {
+    font-family: 'Almarai', system-ui, sans-serif;
+    font-weight: 700;
+    line-height: 1.5;
+    background-color: #f1f5f9;
+    color: #1e293b;
+    overflow-x: hidden;
+    touch-action: manipulation;
+  }
+
+  input, button, select, textarea, optgroup {
+    font-family: 'Almarai', system-ui, sans-serif !important;
+    font-weight: 700 !important;
+    touch-action: manipulation;
+  }
+
+  /* Center text inside all input fields, selects, and textareas across the entire system */
+  input[type="text"],
+  input[type="number"],
+  input[type="date"],
+  input[type="time"],
+  input[type="password"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="email"],
+  input,
+  select,
+  textarea {
+    text-align: center !important;
+  }
+
+  /* Align select options nicely in center */
+  option {
+    text-align: center !important;
+  }
+}
+
+/* Customized scrollbars for clean warm slate & amber ERP look */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #d97706;
+}
+
+@media print {
+  /* Hide non-printable app layout */
+  .no-print {
+    display: none !important;
+  }
+  
+  .print-only {
+    display: block !important;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  @page {
+    margin: 10mm;
+    size: auto;
+  }
+}
+
+@media screen {
+  .print-only {
+    display: none !important;
+  }
+}

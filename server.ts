@@ -1256,7 +1256,7 @@ app.post('/api/mysql/sync/push', async (req: Request, res: Response) => {
 });
 
 // Download dist.zip for XAMPP / Desktop installation
-const handleDistZipDownload = (req: Request, res: Response) => {
+const getTargetDistZipPath = (): string | null => {
   const possiblePaths = [
     path.resolve(__dirname, 'wessam_electrical_erp_dist.zip'),
     path.resolve(__dirname, 'dist.zip'),
@@ -1265,8 +1265,30 @@ const handleDistZipDownload = (req: Request, res: Response) => {
     path.resolve(__dirname, 'dist', 'wessam_electrical_erp_dist.zip'),
     path.resolve(__dirname, 'dist', 'dist.zip')
   ];
+  return possiblePaths.find(p => fs.existsSync(p)) || null;
+};
 
-  const targetZip = possiblePaths.find(p => fs.existsSync(p));
+app.get('/api/download/dist-zip-json', (req: Request, res: Response) => {
+  try {
+    const targetZip = getTargetDistZipPath();
+    if (!targetZip) {
+      return res.status(404).json({ success: false, error: 'ملف التوزيع المضغوط غير موجود' });
+    }
+    const buffer = fs.readFileSync(targetZip);
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    return res.json({
+      success: true,
+      filename: 'wessam_electrical_erp_dist.zip',
+      size: buffer.length,
+      base64: buffer.toString('base64'),
+    });
+  } catch (err: any) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+const handleDistZipDownload = (req: Request, res: Response) => {
+  const targetZip = getTargetDistZipPath();
 
   if (!targetZip) {
     return res.status(404).json({ success: false, error: 'ملف التوزيع المضغوط غير موجود' });

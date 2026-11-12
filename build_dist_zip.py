@@ -92,6 +92,32 @@ if (file_exists(__DIR__ . '/index.html')) {
 
     print("Deployment support scripts, configs, and source files copied to dist.")
 
+    # --- 6b. Mirror compiled XAMPP build to dist_xampp so AI Studio GitHub Sync includes it ---
+    if os.path.exists('dist_xampp'):
+        shutil.rmtree('dist_xampp')
+    os.makedirs('dist_xampp', exist_ok=True)
+    xampp_items = [
+        'index.html',
+        'index.php',
+        '.htaccess',
+        'assets',
+        'api',
+        'alhana_pro_erp.sql',
+        'mysql_schema.sql',
+        'sqlserver_schema.sql',
+        'deploy_to_xampp.bat',
+        'run_desktop.bat',
+        'README.md'
+    ]
+    for item in xampp_items:
+        src_item = os.path.join('dist', item)
+        dst_item = os.path.join('dist_xampp', item)
+        if os.path.isdir(src_item):
+            shutil.copytree(src_item, dst_item)
+        elif os.path.isfile(src_item):
+            shutil.copyfile(src_item, dst_item)
+    print("Mirrored compiled XAMPP build to dist_xampp/ for GitHub Sync.")
+
     # --- 7. Build pristine ZIP package (Single clean root, NO duplicate entries) ---
     zip_filename = 'wessam_electrical_erp_dist.zip'
     

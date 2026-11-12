@@ -22,8 +22,14 @@ if not exist "C:\xampp\htdocs" (
 echo [1/3] جاري إنشاء مجلد البرنامج في XAMPP: %TARGET_DIR% ...
 if not exist "%TARGET_DIR%" mkdir "%TARGET_DIR%"
 
-echo [2/3] جاري نسخ ملفات dist الكاملة إلى htdocs...
-xcopy /E /I /Y "dist\*" "%TARGET_DIR%\"
+echo [2/3] جاري نسخ ملفات المنظومة الكاملة إلى htdocs...
+if exist "dist\index.html" (
+    xcopy /E /I /Y "dist\*" "%TARGET_DIR%\"
+) else if exist "dist_xampp\index.html" (
+    xcopy /E /I /Y "dist_xampp\*" "%TARGET_DIR%\"
+) else (
+    xcopy /E /I /Y "*.*" "%TARGET_DIR%\"
+)
 
 echo [3/3] تم نسخ ملفات البرنامج بنجاح!
 echo.
