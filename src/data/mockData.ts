@@ -1,0 +1,1374 @@
+import {
+  Product,
+  Customer,
+  Supplier,
+  SalesInvoice,
+  PurchaseInvoice,
+  Expense,
+  FinancialTransaction,
+  StoreSettings,
+  User,
+  SafeAccount,
+  AssemblyRecipe,
+  AssemblyOperation,
+  MoneyAssociation
+} from '../types';
+
+export const INITIAL_USERS: User[] = [
+  {
+    id: 'usr-admin',
+    username: 'admin',
+    name: 'المهندس وسام (مدير النظام)',
+    role: 'admin',
+    phone: '01000000001',
+    isActive: true,
+    createdAt: '2026-01-01T00:00:00Z',
+    passwordHash: '123456',
+  },
+  {
+    id: 'usr-cashier',
+    username: 'cashier',
+    name: 'أحمد كاشير (نقطة البيع)',
+    role: 'cashier',
+    phone: '01122334455',
+    isActive: true,
+    createdAt: '2026-01-15T00:00:00Z',
+    passwordHash: '123456',
+  },
+  {
+    id: 'usr-store',
+    username: 'storekeeper',
+    name: 'محمود أمين المخزن والتجميع',
+    role: 'storekeeper',
+    phone: '01233445566',
+    isActive: true,
+    createdAt: '2026-01-20T00:00:00Z',
+    passwordHash: '123456',
+  }
+];
+
+export const INITIAL_SETTINGS: StoreSettings = {
+  storeName: 'وسام للأدوات والتوريدات الكهربائية',
+  ownerName: 'مؤسسة وسام للأدوات الكهربائية',
+  phone: '01000000001',
+  phoneAlt: '01200000002',
+  address: 'القاهرة - السبتية - شارع سوق الكهرباء',
+  commercialRecord: '',
+  agriculturalLicense: 'سجل تجاري توريدات كهربائية ومقاولات',
+  taxRate: 0,
+  invoiceFooterNote: '',
+  currency: 'ج.م',
+  permissionsMatrix: {
+    admin: [
+      'dashboard', 'pos', 'sales', 'sales_returns', 'purchases', 'purchase_returns',
+      'inventory', 'assembly', 'customers', 'suppliers', 'finance', 'statements',
+      'expiry', 'reports', 'calculator', 'users', 'sqlserver', 'settings'
+    ],
+    cashier: [
+      'dashboard', 'pos', 'sales', 'sales_returns', 'customers',
+      'finance', 'statements', 'reports', 'calculator'
+    ],
+    storekeeper: [
+      'dashboard', 'inventory', 'assembly', 'purchases', 'purchase_returns',
+      'suppliers', 'expiry', 'reports'
+    ],
+  }
+};
+
+// -------------------------------------------------------------
+// SAFES & BANK WALLETS (الخزائن والمحافظ النقدية والبنكية)
+// -------------------------------------------------------------
+export const INITIAL_SAFES: SafeAccount[] = [
+  {
+    id: 'safe-main',
+    name: 'الخزينة الرئيسية (المكتب)',
+    type: 'cash',
+    balance: 45000,
+    isDefault: true,
+    notes: 'الخزينة المركزية للإيرادات الكبرى وسداد الموردين والمصروفات'
+  },
+  {
+    id: 'safe-pos',
+    name: 'درج كاشير المبيعات (POS Drawer)',
+    type: 'pos_drawer',
+    balance: 8500,
+    notes: 'نقدية التحصيل اليومي المباشر من مبيعات المعرض'
+  },
+  {
+    id: 'safe-bank',
+    name: 'حساب بنك مصر (تحويلات وفيزا)',
+    type: 'bank',
+    balance: 120000,
+    accountNumber: '10203040506070',
+    notes: 'الحساب البنكي لمشتريات الشركات والتحويلات الرسمية'
+  },
+  {
+    id: 'safe-instapay',
+    name: 'محفظة فودافون كاش وانستا باي',
+    type: 'wallet',
+    balance: 15400,
+    accountNumber: '01000000001@instapay',
+    notes: 'مستحقات ومدفوعات الدفع الإلكتروني السريع'
+  }
+];
+
+// -------------------------------------------------------------
+// ELECTRICAL PRODUCTS CATALOG (كتالوج الأدوات الكهربائية)
+// -------------------------------------------------------------
+export const INITIAL_PRODUCTS: Product[] = [
+  // 1. الأسلاك والكابلات (Wires & Cables)
+  {
+    id: 'p-wire-15',
+    name: 'سلك نحاس معزول 1.5 مم سويدي أصلي (لفة 100م)',
+    category: 'wires_cables',
+    brand: 'السويدي إليكتريك',
+    voltage: '450/750V',
+    unit: 'لفة',
+    purchasePrice: 950,
+    sellingPrice: 1150,
+    wholesalePrice: 1080,
+    quantity: 45,
+    minAlertQuantity: 10,
+    barcode: '6221001001501',
+    warrantyMonths: 0,
+    notes: 'نحاس أحمر نقي 99.9% معتمد للمشاريع والتأسيس'
+  },
+  {
+    id: 'p-wire-25',
+    name: 'سلك نحاس معزول 2.5 مم سويدي أصلي (لفة 100م)',
+    category: 'wires_cables',
+    brand: 'السويدي إليكتريك',
+    voltage: '450/750V',
+    unit: 'لفة',
+    purchasePrice: 1500,
+    sellingPrice: 1780,
+    wholesalePrice: 1690,
+    quantity: 38,
+    minAlertQuantity: 8,
+    barcode: '6221001002508',
+    warrantyMonths: 0,
+    notes: 'سلك برايز وتغذية أحمال متوسطة وتكييفات 1.5 حصان'
+  },
+  {
+    id: 'p-wire-40',
+    name: 'سلك نحاس معزول 4 مم سويدي أصلي (لفة 100م)',
+    category: 'wires_cables',
+    brand: 'السويدي إليكتريك',
+    voltage: '450/750V',
+    unit: 'لفة',
+    purchasePrice: 2400,
+    sellingPrice: 2850,
+    wholesalePrice: 2700,
+    quantity: 22,
+    minAlertQuantity: 5,
+    barcode: '6221001004007',
+    warrantyMonths: 0,
+    notes: 'سلك مطابخ وأحمال سخانات وتكييفات 2.25 حصان'
+  },
+  {
+    id: 'p-wire-60',
+    name: 'سلك نحاس معزول 6 مم سويدي أصلي (لفة 100م)',
+    category: 'wires_cables',
+    brand: 'السويدي إليكتريك',
+    voltage: '450/750V',
+    unit: 'لفة',
+    purchasePrice: 3600,
+    sellingPrice: 4200,
+    wholesalePrice: 3950,
+    quantity: 14,
+    minAlertQuantity: 4,
+    barcode: '6221001006001',
+    warrantyMonths: 0,
+    notes: 'تغذية رئيسية للوحات وتكييفات 3 حصان وأفران'
+  },
+  {
+    id: 'p-wire-rg6',
+    name: 'سلك دش نحاس معزول RG6 عالي الجودة (متر)',
+    category: 'wires_cables',
+    brand: 'بريميوم كابل',
+    voltage: 'إشارة ديجيتال',
+    unit: 'متر',
+    purchasePrice: 8,
+    sellingPrice: 14,
+    wholesalePrice: 11,
+    quantity: 450,
+    minAlertQuantity: 100,
+    barcode: '6221001009019',
+    warrantyMonths: 0,
+    notes: 'شيلد عالي الكثافة ضد التشويش HD 4K'
+  },
+
+  // 2. المفاتيح والبرايز والشاسيهات (Switches & Sockets)
+  {
+    id: 'p-sw-venus',
+    name: 'لقمة مفتاح إنارة عريض 16 أمبير فينوس بيج',
+    category: 'switches_sockets',
+    brand: 'فينوس',
+    voltage: '250V',
+    amperage: '16A',
+    unit: 'قطعة',
+    purchasePrice: 22,
+    sellingPrice: 32,
+    wholesalePrice: 27,
+    quantity: 180,
+    minAlertQuantity: 30,
+    barcode: '6222002001015',
+    warrantyMonths: 24,
+    notes: 'لقمة إنارة بيضاء مع فضة تلامس عالية النقاء'
+  },
+  {
+    id: 'p-sock-schneider',
+    name: 'لقمة بريزة مفردة شنايدر أصلي مع طرف تأريض 16A',
+    category: 'switches_sockets',
+    brand: 'شنايدر إليكتريك',
+    voltage: '250V',
+    amperage: '16A',
+    unit: 'قطعة',
+    purchasePrice: 28,
+    sellingPrice: 42,
+    wholesalePrice: 35,
+    quantity: 140,
+    minAlertQuantity: 25,
+    barcode: '6222002002029',
+    warrantyMonths: 36,
+    notes: 'بريزة أمان مع شتر حماية للأطفال'
+  },
+  {
+    id: 'p-chassis-magic',
+    name: 'شاسيه ماجيك حديد مقوى فينوس مع مسامير التثبيت',
+    category: 'switches_sockets',
+    brand: 'فينوس',
+    unit: 'قطعة',
+    purchasePrice: 8,
+    sellingPrice: 14,
+    wholesalePrice: 11,
+    quantity: 260,
+    minAlertQuantity: 40,
+    barcode: '6222002003033',
+    notes: 'شاسيه ماجيك قياسي يركب على كافة العلب الماجيك'
+  },
+  {
+    id: 'p-face-venus',
+    name: 'وش ماجيك 3 فتحة كلاسيك فينوس عاجي',
+    category: 'switches_sockets',
+    brand: 'فينوس',
+    unit: 'قطعة',
+    purchasePrice: 12,
+    sellingPrice: 20,
+    wholesalePrice: 16,
+    quantity: 210,
+    minAlertQuantity: 30,
+    barcode: '6222002004047',
+    notes: 'بلاستيك بولي كربونات مقاوم للخدش والحرارة'
+  },
+  {
+    id: 'p-sw-deviateur',
+    name: 'مفتاح ديفياتير (طرف سلم) 16A فينوس',
+    category: 'switches_sockets',
+    brand: 'فينوس',
+    voltage: '250V',
+    amperage: '16A',
+    unit: 'قطعة',
+    purchasePrice: 26,
+    sellingPrice: 38,
+    wholesalePrice: 32,
+    quantity: 65,
+    minAlertQuantity: 15,
+    barcode: '6222002005051',
+    warrantyMonths: 24,
+    notes: 'للتحكم في إنارة الممرات والسلالم من مكانين'
+  },
+
+  // 3. اللمبات والكشافات والإنارة (Lighting & Bulbs)
+  {
+    id: 'p-lamp-9w',
+    name: 'لمبة ليد 9 وات إضاءة بيضاء E27 توشيبا',
+    category: 'lighting_bulbs',
+    brand: 'توشيبا',
+    voltage: '220V',
+    powerWatt: '9W',
+    unit: 'قطعة',
+    purchasePrice: 35,
+    sellingPrice: 50,
+    wholesalePrice: 42,
+    quantity: 120,
+    minAlertQuantity: 20,
+    barcode: '6223003001012',
+    warrantyMonths: 24,
+    notes: 'إضاءة قوية 850 لومن مع ضمان معتمد لمدة عامين'
+  },
+  {
+    id: 'p-lamp-12w',
+    name: 'لمبة ليد 12 وات ورم (إضاءة دافئة) فيليبس E27',
+    category: 'lighting_bulbs',
+    brand: 'فيليبس',
+    voltage: '220V',
+    powerWatt: '12W',
+    unit: 'قطعة',
+    purchasePrice: 48,
+    sellingPrice: 68,
+    wholesalePrice: 58,
+    quantity: 95,
+    minAlertQuantity: 15,
+    barcode: '6223003002026',
+    warrantyMonths: 24,
+    notes: 'موفرة للطاقة 85% مع عمر افتراضي 15,000 ساعة'
+  },
+  {
+    id: 'p-flood-50w',
+    name: 'كشاف ليد خارجي 50 وات ضد الماء IP66 ساطع',
+    category: 'lighting_bulbs',
+    brand: 'فينوس إكستريم',
+    voltage: '220V',
+    powerWatt: '50W',
+    unit: 'قطعة',
+    purchasePrice: 210,
+    sellingPrice: 295,
+    wholesalePrice: 260,
+    quantity: 32,
+    minAlertQuantity: 6,
+    barcode: '6223003003030',
+    warrantyMonths: 24,
+    notes: 'جسم ألومنيوم مصفح تبريد عالي مع عدسة زجاج حراري للواجهات والحدائق'
+  },
+  {
+    id: 'p-panel-6060',
+    name: 'بانل ليد سقف غاطس 60×60 سم 48 وات فينوس إضاءة بيضاء',
+    category: 'lighting_bulbs',
+    brand: 'فينوس',
+    voltage: '220V',
+    powerWatt: '48W',
+    unit: 'قطعة',
+    purchasePrice: 320,
+    sellingPrice: 440,
+    wholesalePrice: 390,
+    quantity: 26,
+    minAlertQuantity: 5,
+    barcode: '6223003004044',
+    warrantyMonths: 36,
+    notes: 'للشركات والمكاتب، إضاءة متجانسة مريحة للعين مع درايفر تيار معزول'
+  },
+  {
+    id: 'p-spot-7w',
+    name: 'سبوت لايت ليد متحرك 7 وات COB داي كاست مع درايفر',
+    category: 'lighting_bulbs',
+    brand: 'توشيبا سمارت',
+    voltage: '220V',
+    powerWatt: '7W',
+    unit: 'قطعة',
+    purchasePrice: 45,
+    sellingPrice: 65,
+    wholesalePrice: 54,
+    quantity: 110,
+    minAlertQuantity: 20,
+    barcode: '6223003005058',
+    warrantyMonths: 24,
+    notes: 'قطر فتحة السقف 7 سم، زاوية إضاءة موجهة لديكورات الجبس بورد'
+  },
+  {
+    id: 'p-strip-neon',
+    name: 'شريط ليد نيون فليكس 220V إضاءة دافئة (بكرة 50 متر)',
+    category: 'lighting_bulbs',
+    brand: 'أوسرام تكنولوجي',
+    voltage: '220V',
+    unit: 'بكرة',
+    purchasePrice: 680,
+    sellingPrice: 890,
+    wholesalePrice: 790,
+    quantity: 8,
+    minAlertQuantity: 2,
+    barcode: '6223003006062',
+    warrantyMonths: 12,
+    notes: 'شريط سيليكون مرن عازل للماء IP67 لبيت النور والواجهات'
+  },
+
+  // 4. القواطع ولوحات التوزيع (Circuit Breakers & Panels)
+  {
+    id: 'p-breaker-16a',
+    name: 'قاطع أوتوماتيك أحادي 16 أمبير C16 شنايدر إلكتريك',
+    category: 'breakers_panels',
+    brand: 'شنايدر إليكتريك',
+    voltage: '230/400V',
+    amperage: '16A',
+    unit: 'قطعة',
+    purchasePrice: 110,
+    sellingPrice: 155,
+    wholesalePrice: 135,
+    quantity: 75,
+    minAlertQuantity: 15,
+    barcode: '6224004001019',
+    warrantyMonths: 36,
+    notes: 'قدرة كسر 4.5kA لحماية دوائر الإنارة والبرايز'
+  },
+  {
+    id: 'p-breaker-25a',
+    name: 'قاطع أوتوماتيك أحادي 25 أمبير C25 شنايدر إلكتريك',
+    category: 'breakers_panels',
+    brand: 'شنايدر إليكتريك',
+    voltage: '230/400V',
+    amperage: '25A',
+    unit: 'قطعة',
+    purchasePrice: 115,
+    sellingPrice: 160,
+    wholesalePrice: 140,
+    quantity: 60,
+    minAlertQuantity: 15,
+    barcode: '6224004002023',
+    warrantyMonths: 36,
+    notes: 'قدرة كسر 4.5kA لحماية خطوط التكييف والسخانات'
+  },
+  {
+    id: 'p-breaker-3p-63a',
+    name: 'قاطع أوتوماتيك ثلاثي 3 فاز 63 أمبير شنايدر إلكتريك',
+    category: 'breakers_panels',
+    brand: 'شنايدر إليكتريك',
+    voltage: '400V',
+    amperage: '63A',
+    unit: 'قطعة',
+    purchasePrice: 480,
+    sellingPrice: 650,
+    wholesalePrice: 580,
+    quantity: 18,
+    minAlertQuantity: 4,
+    barcode: '6224004003037',
+    warrantyMonths: 36,
+    notes: 'قاطع عمومي للوحات الشقق والمصاعد والورش قدرة كسر 6kA'
+  },
+  {
+    id: 'p-panel-12line',
+    name: 'لوحة قواطع توزيع غاطس 12 خط فينوس باب شفاف مع بارات نحاس',
+    category: 'breakers_panels',
+    brand: 'فينوس',
+    unit: 'قطعة',
+    purchasePrice: 190,
+    sellingPrice: 270,
+    wholesalePrice: 235,
+    quantity: 28,
+    minAlertQuantity: 6,
+    barcode: '6224004004041',
+    warrantyMonths: 60,
+    notes: 'علبة بلاستيك بيضاء ذاتية الإطفاء مع ميزان ماء للتثبيت الدقيق'
+  },
+
+  // 5. الخراطيم والمواسير ومستلزمات التأسيس (Conduits & Boxes)
+  {
+    id: 'p-hose-16',
+    name: 'لفة خرطوم سوستة مرن مصطفى محمود 16 مم (50 متر)',
+    category: 'pipes_conduits',
+    brand: 'مصطفى محمود',
+    unit: 'لفة',
+    purchasePrice: 140,
+    sellingPrice: 195,
+    wholesalePrice: 175,
+    quantity: 35,
+    minAlertQuantity: 8,
+    barcode: '6225005001016',
+    notes: 'خرطوم مقاوم للانضغاط لصب الخرسانات والأسقف'
+  },
+  {
+    id: 'p-box-1010',
+    name: 'بواط تجميع خارجي 10×10 سم ضد المطر IP55 مع جوان كاوتش',
+    category: 'pipes_conduits',
+    brand: 'الأهرام للبلاستيك',
+    unit: 'قطعة',
+    purchasePrice: 18,
+    sellingPrice: 28,
+    wholesalePrice: 23,
+    quantity: 90,
+    minAlertQuantity: 20,
+    barcode: '6225005002020',
+    notes: 'بواط بلاستيك رمادي للمسارات الخارجية وتجميع الكاميرات والإنارة'
+  },
+
+  // 6. العدد وأجهزة القياس (Tools & Meters)
+  {
+    id: 'p-multimeter',
+    name: 'ملتيميتر فحص كهربائي ديجيتال محترف مع شاشة مضيئة وبازر',
+    category: 'tools_meters',
+    brand: 'يوني تي (UNI-T)',
+    voltage: '600V AC/DC',
+    unit: 'قطعة',
+    purchasePrice: 280,
+    sellingPrice: 395,
+    wholesalePrice: 345,
+    quantity: 15,
+    minAlertQuantity: 3,
+    barcode: '6226006001013',
+    warrantyMonths: 12,
+    notes: 'لقياس الفولت والأوم والأمبير وفحص التوصيلية والدايود'
+  },
+  {
+    id: 'p-clampmeter',
+    name: 'بنسة أمبير ديجيتال كليب ميتر لقياس الأحمال والتيار 400A',
+    category: 'tools_meters',
+    brand: 'يوني تي (UNI-T)',
+    amperage: '400A',
+    unit: 'قطعة',
+    purchasePrice: 450,
+    sellingPrice: 630,
+    wholesalePrice: 560,
+    quantity: 12,
+    minAlertQuantity: 3,
+    barcode: '6226006002027',
+    warrantyMonths: 12,
+    notes: 'لقياس سحب الأمبير دون قطع السلك فائق الدقة'
+  },
+  {
+    id: 'p-tester-pen',
+    name: 'مفك فحص وتست كهربائي ألماني مع لمبة نيون بيضاء',
+    category: 'tools_meters',
+    brand: 'ستانلي ألماني',
+    voltage: '100-500V',
+    unit: 'قطعة',
+    purchasePrice: 25,
+    sellingPrice: 40,
+    wholesalePrice: 32,
+    quantity: 85,
+    minAlertQuantity: 15,
+    barcode: '6226006003031',
+    notes: 'مفك صلب عازل للكهرباء للكشف عن الطرف الحي (الكهرباء)'
+  },
+
+  // 7. المستلزمات والإكسسوارات (Accessories)
+  {
+    id: 'p-tape-isolin',
+    name: 'شريط لحام كهربائي إيزولين عازل أصلي (دستة 10 بكرات)',
+    category: 'accessories',
+    brand: 'إيزولين إيطالي',
+    unit: 'علبة',
+    purchasePrice: 45,
+    sellingPrice: 65,
+    wholesalePrice: 55,
+    quantity: 60,
+    minAlertQuantity: 10,
+    barcode: '6227007001010',
+    notes: 'شريط عازل عالي المرونة والالتصاق غير قابل للاشتعال'
+  },
+
+  // -------------------------------------------------------------
+  // ASSEMBLED / COMPOSITE PRODUCTS (أصناف مجمعة / باقات جاهزة)
+  // -------------------------------------------------------------
+  {
+    id: 'p-kit-panel-assembled',
+    name: 'لوحة توزيع 12 خط مجهزة وجاهزة للتركيب (قواطع شنايدر + بارات)',
+    category: 'breakers_panels',
+    brand: 'تجميع وسام للكهرباء',
+    voltage: '230/400V',
+    unit: 'طقم',
+    purchasePrice: 1420, // Sum of parts + labor
+    sellingPrice: 1950,
+    wholesalePrice: 1780,
+    quantity: 6,
+    minAlertQuantity: 2,
+    barcode: '6228008001017',
+    warrantyMonths: 36,
+    isComposite: true,
+    recipeId: 'recipe-panel-12',
+    notes: 'لوحة 12 خط + قاطع عمومي 63A + 4 قواطع 16A + 4 قواطع 25A + بارات نحاس مجمعة على يد فنيين محترفين'
+  },
+  {
+    id: 'p-kit-room-finish',
+    name: 'طقم تشطيب غرفة نوم / صالون متكامل فينوس (شاسيهات + وشوش + لقم)',
+    category: 'switches_sockets',
+    brand: 'تجميع وسام للكهرباء',
+    unit: 'طقم',
+    purchasePrice: 420,
+    sellingPrice: 580,
+    wholesalePrice: 510,
+    quantity: 10,
+    minAlertQuantity: 3,
+    barcode: '6228008002021',
+    warrantyMonths: 24,
+    isComposite: true,
+    recipeId: 'recipe-room-finish',
+    notes: 'طقم متكامل يحتوي على 6 شاسيه + 6 وش فينوس + 4 لقمة مفتاح + 8 لقمة بريزة أمان'
+  },
+  {
+    id: 'p-kit-flood-cord',
+    name: 'باقة كشاف ليد خارجي 50 وات مجهز مع كابل 5 متر وفيشة ذكر محملة',
+    category: 'lighting_bulbs',
+    brand: 'تجميع وسام للكهرباء',
+    voltage: '220V',
+    powerWatt: '50W',
+    unit: 'طقم',
+    purchasePrice: 285,
+    sellingPrice: 395,
+    wholesalePrice: 350,
+    quantity: 8,
+    minAlertQuantity: 2,
+    barcode: '6228008003035',
+    warrantyMonths: 24,
+    isComposite: true,
+    recipeId: 'recipe-flood-cord',
+    notes: 'جاهز للاستخدام الفوري للمحلات والحدائق والمواقع مع توصيل معزول ضد الماء'
+  }
+];
+
+// -------------------------------------------------------------
+// ASSEMBLY RECIPES (وصفات التجميع والتفكيك - BOM)
+// -------------------------------------------------------------
+export const INITIAL_RECIPES: AssemblyRecipe[] = [
+  {
+    id: 'recipe-panel-12',
+    name: 'لوحة قواطع توزيع 12 خط مجهزة شنايدر',
+    outputProductId: 'p-kit-panel-assembled',
+    outputProductName: 'لوحة توزيع 12 خط مجهزة وجاهزة للتركيب (قواطع شنايدر + بارات)',
+    outputQuantity: 1,
+    outputUnit: 'طقم',
+    laborCost: 100, // مصنعية التجميع والتقفيل
+    totalEstimatedCost: 1420,
+    notes: 'يتم استخدام أسلاك ترميل نحاس وبارات أصلية لربط القواطع بإحكام واختبار العزل',
+    createdAt: '2026-02-01T10:00:00Z',
+    components: [
+      {
+        productId: 'p-panel-12line',
+        productName: 'لوحة قواطع توزيع غاطس 12 خط فينوس باب شفاف مع بارات نحاس',
+        quantity: 1,
+        unit: 'قطعة',
+        unitCost: 190,
+        totalCost: 190,
+      },
+      {
+        productId: 'p-breaker-3p-63a',
+        productName: 'قاطع أوتوماتيك ثلاثي 3 فاز 63 أمبير شنايدر إلكتريك',
+        quantity: 1,
+        unit: 'قطعة',
+        unitCost: 480,
+        totalCost: 480,
+      },
+      {
+        productId: 'p-breaker-16a',
+        productName: 'قاطع أوتوماتيك أحادي 16 أمبير C16 شنايدر إلكتريك',
+        quantity: 4,
+        unit: 'قطعة',
+        unitCost: 110,
+        totalCost: 440,
+      },
+      {
+        productId: 'p-breaker-25a',
+        productName: 'قاطع أوتوماتيك أحادي 25 أمبير C25 شنايدر إلكتريك',
+        quantity: 2,
+        unit: 'قطعة',
+        unitCost: 115,
+        totalCost: 230,
+      }
+    ]
+  },
+  {
+    id: 'recipe-room-finish',
+    name: 'طقم تشطيب حجرة كهرباء فينوس متكامل',
+    outputProductId: 'p-kit-room-finish',
+    outputProductName: 'طقم تشطيب غرفة نوم / صالون متكامل فينوس (شاسيهات + وشوش + لقم)',
+    outputQuantity: 1,
+    outputUnit: 'طقم',
+    laborCost: 20, // تغليف وتجميع
+    totalEstimatedCost: 420,
+    notes: 'باقة تشطيب مجمعة بخصم خاص للعملاء والمقاولين جاهزة للتركيب',
+    createdAt: '2026-02-10T11:00:00Z',
+    components: [
+      {
+        productId: 'p-chassis-magic',
+        productName: 'شاسيه ماجيك حديد مقوى فينوس مع مسامير التثبيت',
+        quantity: 6,
+        unit: 'قطعة',
+        unitCost: 8,
+        totalCost: 48,
+      },
+      {
+        productId: 'p-face-venus',
+        productName: 'وش ماجيك 3 فتحة كلاسيك فينوس عاجي',
+        quantity: 6,
+        unit: 'قطعة',
+        unitCost: 12,
+        totalCost: 72,
+      },
+      {
+        productId: 'p-sw-venus',
+        productName: 'لقمة مفتاح إنارة عريض 16 أمبير فينوس بيج',
+        quantity: 4,
+        unit: 'قطعة',
+        unitCost: 22,
+        totalCost: 88,
+      },
+      {
+        productId: 'p-sock-schneider',
+        productName: 'لقمة بريزة مفردة شنايدر أصلي مع طرف تأريض 16A',
+        quantity: 6,
+        unit: 'قطعة',
+        unitCost: 28,
+        totalCost: 168,
+      },
+      {
+        productId: 'p-sw-deviateur',
+        productName: 'مفتاح ديفياتير (طرف سلم) 16A فينوس',
+        quantity: 1,
+        unit: 'قطعة',
+        unitCost: 26,
+        totalCost: 26,
+      }
+    ]
+  },
+  {
+    id: 'recipe-flood-cord',
+    name: 'كشاف ليد 50 وات مجهز بكابل توصيل وفيشة',
+    outputProductId: 'p-kit-flood-cord',
+    outputProductName: 'باقة كشاف ليد خارجي 50 وات مجهز مع كابل 5 متر وفيشة ذكر محملة',
+    outputQuantity: 1,
+    outputUnit: 'طقم',
+    laborCost: 35,
+    totalEstimatedCost: 285,
+    notes: 'كشاف 50W مع سلك سويدي 2×1.5مم بطول 5 متر وفيشة أمان',
+    createdAt: '2026-02-15T12:00:00Z',
+    components: [
+      {
+        productId: 'p-flood-50w',
+        productName: 'كشاف ليد خارجي 50 وات ضد الماء IP66 ساطع',
+        quantity: 1,
+        unit: 'قطعة',
+        unitCost: 210,
+        totalCost: 210,
+      },
+      {
+        productId: 'p-wire-15',
+        productName: 'سلك نحاس معزول 1.5 مم سويدي أصلي (لفة 100م)',
+        quantity: 0.05, // 5 أمتار (0.05 من اللفة)
+        unit: 'لفة',
+        unitCost: 950,
+        totalCost: 47.5,
+      }
+    ]
+  }
+];
+
+export const INITIAL_ASSEMBLY_OPERATIONS: AssemblyOperation[] = [
+  {
+    id: 'asm-op-1',
+    operationNumber: 'ASM-2026-001',
+    type: 'assembly',
+    recipeId: 'recipe-panel-12',
+    recipeName: 'لوحة قواطع توزيع 12 خط مجهزة شنايدر',
+    targetProductId: 'p-kit-panel-assembled',
+    targetProductName: 'لوحة توزيع 12 خط مجهزة وجاهزة للتركيب (قواطع شنايدر + بارات)',
+    quantity: 4,
+    unit: 'طقم',
+    totalCost: 5680,
+    laborCost: 400,
+    operatorName: 'محمود أمين المخزن والتجميع',
+    date: '2026-10-15T14:30:00Z',
+    notes: 'تم تجميع واختبار 4 لوحات توزيع كاملة جاهزة للتسليم في المخزن',
+    componentsAffected: [
+      {
+        productId: 'p-panel-12line',
+        productName: 'لوحة قواطع توزيع غاطس 12 خط فينوس باب شفاف مع بارات نحاس',
+        quantity: 4,
+        unit: 'قطعة',
+        unitCost: 190,
+        totalCost: 760,
+        direction: 'deducted'
+      },
+      {
+        productId: 'p-breaker-3p-63a',
+        productName: 'قاطع أوتوماتيك ثلاثي 3 فاز 63 أمبير شنايدر إلكتريك',
+        quantity: 4,
+        unit: 'قطعة',
+        unitCost: 480,
+        totalCost: 1920,
+        direction: 'deducted'
+      },
+      {
+        productId: 'p-breaker-16a',
+        productName: 'قاطع أوتوماتيك أحادي 16 أمبير C16 شنايدر إلكتريك',
+        quantity: 16,
+        unit: 'قطعة',
+        unitCost: 110,
+        totalCost: 1760,
+        direction: 'deducted'
+      },
+      {
+        productId: 'p-breaker-25a',
+        productName: 'قاطع أوتوماتيك أحادي 25 أمبير C25 شنايدر إلكتريك',
+        quantity: 8,
+        unit: 'قطعة',
+        unitCost: 115,
+        totalCost: 920,
+        direction: 'deducted'
+      }
+    ]
+  }
+];
+
+// -------------------------------------------------------------
+// CUSTOMERS & CONTRACTORS (العملاء ومقاولو الكهرباء)
+// -------------------------------------------------------------
+export const WALK_IN_CUSTOMER: Customer = {
+  id: 'walk-in',
+  code: 'CUST-000',
+  name: 'عميل نقدي عام',
+  phone: '0000000000',
+  address: 'مبيعات الكاشير المباشرة',
+  customerType: 'retail',
+  cropTypes: 'عميل نقدي عام (حساب دائم)',
+  initialBalance: 0,
+  currentBalance: 0,
+  creditLimit: 0,
+  notes: 'حساب دائم في النظام للمبيعات النقدية المباشرة - محمي من الحذف والتعديل ولا يسمح له بفواتير آجل نهائياً',
+  createdAt: '2026-01-01T00:00:00Z',
+};
+
+export const isWalkInCustomer = (idOrCustomer?: string | Partial<Customer> | null): boolean => {
+  if (!idOrCustomer) return false;
+  if (typeof idOrCustomer === 'string') {
+    return idOrCustomer === 'walk-in' || idOrCustomer === 'CUST-000';
+  }
+  return (
+    idOrCustomer.id === 'walk-in' ||
+    idOrCustomer.code === 'CUST-000' ||
+    (typeof idOrCustomer.name === 'string' &&
+      (idOrCustomer.name.trim() === 'عميل نقدي عام' ||
+        idOrCustomer.name.includes('عميل نقدي عام')))
+  );
+};
+
+export const INITIAL_CUSTOMERS: Customer[] = [
+  WALK_IN_CUSTOMER,
+  {
+    id: 'cust-1',
+    name: 'المقاول حسن الصاوي (شركة الصاوي للمقاولات والديكور)',
+    phone: '01012345678',
+    address: 'التجمع الخامس - القاهرة الجديدة',
+    customerType: 'contractor',
+    commercialRecord: 'س.ت: 45019 / ب.ض: 190-340',
+    currentBalance: 14500, // مديونية عليه للمتجر
+    creditLimit: 50000,
+    notes: 'عميل مقاولات متميز، مشتريات منتظمة للمشاريع والفلل',
+    createdAt: '2026-01-10T12:00:00Z',
+  },
+  {
+    id: 'cust-2',
+    name: 'الأسطى إبراهيم الكهربائي (فني تمديدات منازل)',
+    phone: '01198765432',
+    address: 'شبرا الخيمة - القليوبية',
+    customerType: 'technician',
+    currentBalance: 3200,
+    creditLimit: 15000,
+    notes: 'فني تأسيس كهرباء معتمد، يستفيد من أسعار الجملة',
+    createdAt: '2026-01-15T14:30:00Z',
+  },
+  {
+    id: 'cust-3',
+    name: 'المهندس طارق عبد المنعم (مالك شقة برج الصفوة)',
+    phone: '01234567890',
+    address: 'مدينة نصر - المنطقة السادسة',
+    customerType: 'retail',
+    currentBalance: 0,
+    creditLimit: 5000,
+    notes: 'عميل قطاعي نقدي، تشطيب شقة سكنية',
+    createdAt: '2026-02-01T09:15:00Z',
+  },
+  {
+    id: 'cust-4',
+    name: 'شركة النور للمقاولات والتطوير العقاري',
+    phone: '01055566677',
+    address: 'المعادي - شارع النصر',
+    customerType: 'company',
+    commercialRecord: 'س.ت: 89012 / ب.ض: 660-880',
+    currentBalance: 38000,
+    creditLimit: 100000,
+    notes: 'توريدات كهربائية لمشروع عمائر سكنية بالشروق',
+    createdAt: '2026-02-05T16:00:00Z',
+  }
+];
+
+// -------------------------------------------------------------
+// SUPPLIERS & FACTORIES (شركات التوريد والمصانع)
+// -------------------------------------------------------------
+export const INITIAL_SUPPLIERS: Supplier[] = [
+  {
+    id: 'supp-1',
+    name: 'شركة السويدي للكابلات والأسلاك (التوكيل الرئيسي)',
+    representativeName: 'الأستاذ وائل فهمي (مندوب السويدي)',
+    phone: '01011122233',
+    address: 'المنطقة الصناعية - العاشر من رمضان',
+    suppliedCategories: 'أسلاك نحاس معزول، كابلات ألومنيوم، كابلات مسلحة',
+    initialBalance: 42000,
+    currentBalance: 42000, // مستحقات للشركة
+    notes: 'سداد بشيكات أو تحويلات بنكية بفترة سماح 30 يوم',
+    createdAt: '2026-01-01T08:00:00Z',
+  },
+  {
+    id: 'supp-2',
+    name: 'شركة فينوس للصناعات والحلول الكهربائية',
+    representativeName: 'م/ سامح عبد العزيز',
+    phone: '01033344455',
+    address: 'مدينة العبور - المنطقة الصناعية ب/ج',
+    suppliedCategories: 'مفاتيح، برايز، لوحات قواطع، لمبات ليد وبانلات',
+    initialBalance: 18500,
+    currentBalance: 18500,
+    notes: 'وكيل مباشر مع خصم إضافي للبونص الشهري',
+    createdAt: '2026-01-05T10:00:00Z',
+  },
+  {
+    id: 'supp-3',
+    name: 'توكيل شنايدر إليكتريك مصر (Schneider Electric)',
+    representativeName: 'م/ خالد مرسي',
+    phone: '01077788899',
+    address: 'التجمع الخامس - مجمع الشركات',
+    suppliedCategories: 'قواطع ديجيتال، لوحات، مفاتيح أوتوماتيك، كونتاكتورات',
+    initialBalance: 28000,
+    currentBalance: 28000,
+    notes: 'أصناف معتمدة ومطابقة للمواصفات القياسية العالمية',
+    createdAt: '2026-01-10T11:00:00Z',
+  },
+  {
+    id: 'supp-4',
+    name: 'مصنع مصطفى محمود لخراطيم ومواسير الكهرباء',
+    representativeName: 'الحاج رمضان',
+    phone: '01099900011',
+    address: 'قليوب - طريق مصر إسكندرية الزراعي',
+    suppliedCategories: 'خراطيم سوستة، مواسير صلب وبلاستيك، علب ماجيك',
+    initialBalance: 9500,
+    currentBalance: 9500,
+    notes: 'توريد أسبوعي للمخزن',
+    createdAt: '2026-01-12T13:00:00Z',
+  }
+];
+
+// -------------------------------------------------------------
+// SALES INVOICES (فواتير المبيعات)
+// -------------------------------------------------------------
+export const INITIAL_SALES_INVOICES: SalesInvoice[] = [
+  {
+    id: 'inv-s-1001',
+    invoiceNumber: 'INV-2026-1001',
+    date: '2026-10-20T10:30:00Z',
+    customerId: 'cust-1',
+    customerName: 'المقاول حسن الصاوي (شركة الصاوي للمقاولات والديكور)',
+    customerPhone: '01012345678',
+    items: [
+      {
+        productId: 'p-wire-15',
+        productName: 'سلك نحاس معزول 1.5 مم سويدي أصلي (لفة 100م)',
+        category: 'wires_cables',
+        brand: 'السويدي إليكتريك',
+        unit: 'لفة',
+        unitPrice: 1150,
+        purchaseCost: 950,
+        quantity: 5,
+        total: 5750,
+      },
+      {
+        productId: 'p-wire-25',
+        productName: 'سلك نحاس معزول 2.5 مم سويدي أصلي (لفة 100م)',
+        category: 'wires_cables',
+        brand: 'السويدي إليكتريك',
+        unit: 'لفة',
+        unitPrice: 1780,
+        purchaseCost: 1500,
+        quantity: 4,
+        total: 7120,
+      },
+      {
+        productId: 'p-kit-panel-assembled',
+        productName: 'لوحة توزيع 12 خط مجهزة وجاهزة للتركيب (قواطع شنايدر + بارات)',
+        category: 'breakers_panels',
+        brand: 'تجميع وسام للكهرباء',
+        unit: 'طقم',
+        unitPrice: 1950,
+        purchaseCost: 1420,
+        quantity: 2,
+        total: 3900,
+      }
+    ],
+    subtotal: 16770,
+    discount: 270,
+    total: 16500,
+    paidAmount: 10000,
+    remainingAmount: 6500,
+    paymentMethod: 'credit',
+    safeId: 'safe-pos',
+    notes: 'دفعة نقدية 10,000 ج.م والباقي 6,500 ج.م آجل لحساب المقاول حسن الصاوي',
+    status: 'completed'
+  },
+  {
+    id: 'inv-s-1002',
+    invoiceNumber: 'INV-2026-1002',
+    date: '2026-10-21T16:15:00Z',
+    customerId: 'cust-2',
+    customerName: 'الأسطى إبراهيم الكهربائي (فني تمديدات منازل)',
+    customerPhone: '01198765432',
+    items: [
+      {
+        productId: 'p-sw-venus',
+        productName: 'لقمة مفتاح إنارة عريض 16 أمبير فينوس بيج',
+        category: 'switches_sockets',
+        brand: 'فينوس',
+        unit: 'قطعة',
+        unitPrice: 32,
+        purchaseCost: 22,
+        quantity: 20,
+        total: 640,
+      },
+      {
+        productId: 'p-sock-schneider',
+        productName: 'لقمة بريزة مفردة شنايدر أصلي مع طرف تأريض 16A',
+        category: 'switches_sockets',
+        brand: 'شنايدر إليكتريك',
+        unit: 'قطعة',
+        unitPrice: 42,
+        purchaseCost: 28,
+        quantity: 25,
+        total: 1050,
+      },
+      {
+        productId: 'p-chassis-magic',
+        productName: 'شاسيه ماجيك حديد مقوى فينوس مع مسامير التثبيت',
+        category: 'switches_sockets',
+        brand: 'فينوس',
+        unit: 'قطعة',
+        unitPrice: 14,
+        purchaseCost: 8,
+        quantity: 15,
+        total: 210,
+      },
+      {
+        productId: 'p-tape-isolin',
+        productName: 'شريط لحام كهربائي إيزولين عازل أصلي (دستة 10 بكرات)',
+        category: 'accessories',
+        brand: 'إيزولين إيطالي',
+        unit: 'علبة',
+        unitPrice: 65,
+        purchaseCost: 45,
+        quantity: 3,
+        total: 195,
+      }
+    ],
+    subtotal: 2095,
+    discount: 95,
+    total: 2000,
+    paidAmount: 2000,
+    remainingAmount: 0,
+    paymentMethod: 'cash',
+    safeId: 'safe-pos',
+    notes: 'سداد نقدي بالكامل في درج كاشير المعرض',
+    status: 'completed'
+  },
+  {
+    id: 'inv-s-1003',
+    invoiceNumber: 'INV-2026-1003',
+    date: '2026-10-22T12:00:00Z',
+    customerId: 'cust-3',
+    customerName: 'المهندس طارق عبد المنعم (مالك شقة برج الصفوة)',
+    customerPhone: '01234567890',
+    items: [
+      {
+        productId: 'p-lamp-9w',
+        productName: 'لمبة ليد 9 وات إضاءة بيضاء E27 توشيبا',
+        category: 'lighting_bulbs',
+        brand: 'توشيبا',
+        unit: 'قطعة',
+        unitPrice: 50,
+        purchaseCost: 35,
+        quantity: 15,
+        total: 750,
+      },
+      {
+        productId: 'p-lamp-12w',
+        productName: 'لمبة ليد 12 وات ورم (إضاءة دافئة) فيليبس E27',
+        category: 'lighting_bulbs',
+        brand: 'فيليبس',
+        unit: 'قطعة',
+        unitPrice: 68,
+        purchaseCost: 48,
+        quantity: 10,
+        total: 680,
+      },
+      {
+        productId: 'p-spot-7w',
+        productName: 'سبوت لايت ليد متحرك 7 وات COB داي كاست مع درايفر',
+        category: 'lighting_bulbs',
+        brand: 'توشيبا سمارت',
+        unit: 'قطعة',
+        unitPrice: 65,
+        purchaseCost: 45,
+        quantity: 8,
+        total: 520,
+      }
+    ],
+    subtotal: 1950,
+    discount: 50,
+    total: 1900,
+    paidAmount: 1900,
+    remainingAmount: 0,
+    paymentMethod: 'instapay',
+    safeId: 'safe-instapay',
+    notes: 'تحويل مباشر عبر انستا باي على حساب المؤسسة',
+    status: 'completed'
+  }
+];
+
+// -------------------------------------------------------------
+// PURCHASE INVOICES (فواتير المشتريات والتوريدات)
+// -------------------------------------------------------------
+export const INITIAL_PURCHASE_INVOICES: PurchaseInvoice[] = [
+  {
+    id: 'inv-p-501',
+    invoiceNumber: 'PUR-2026-501',
+    date: '2026-10-10T09:00:00Z',
+    supplierId: 'supp-1',
+    supplierName: 'شركة السويدي للكابلات والأسلاك (التوكيل الرئيسي)',
+    items: [
+      {
+        productId: 'p-wire-15',
+        productName: 'سلك نحاس معزول 1.5 مم سويدي أصلي (لفة 100م)',
+        unit: 'لفة',
+        unitPrice: 950,
+        quantity: 30,
+        total: 28500,
+      },
+      {
+        productId: 'p-wire-25',
+        productName: 'سلك نحاس معزول 2.5 مم سويدي أصلي (لفة 100م)',
+        unit: 'لفة',
+        unitPrice: 1500,
+        quantity: 25,
+        total: 37500,
+      },
+      {
+        productId: 'p-wire-40',
+        productName: 'سلك نحاس معزول 4 مم سويدي أصلي (لفة 100م)',
+        unit: 'لفة',
+        unitPrice: 2400,
+        quantity: 15,
+        total: 36000,
+      }
+    ],
+    total: 102000,
+    paidAmount: 60000,
+    remainingAmount: 42000,
+    paymentMethod: 'transfer',
+    safeId: 'safe-bank',
+    notes: 'تحويل بنكي 60,000 ج.م من حساب بنك مصر، والباقي 42,000 ج.م آجل'
+  },
+  {
+    id: 'inv-p-502',
+    invoiceNumber: 'PUR-2026-502',
+    date: '2026-10-14T11:30:00Z',
+    supplierId: 'supp-2',
+    supplierName: 'شركة فينوس للصناعات والحلول الكهربائية',
+    items: [
+      {
+        productId: 'p-sw-venus',
+        productName: 'لقمة مفتاح إنارة عريض 16 أمبير فينوس بيج',
+        unit: 'قطعة',
+        unitPrice: 22,
+        quantity: 200,
+        total: 4400,
+      },
+      {
+        productId: 'p-chassis-magic',
+        productName: 'شاسيه ماجيك حديد مقوى فينوس مع مسامير التثبيت',
+        unit: 'قطعة',
+        unitPrice: 8,
+        quantity: 300,
+        total: 2400,
+      },
+      {
+        productId: 'p-lamp-9w',
+        productName: 'لمبة ليد 9 وات إضاءة بيضاء E27 توشيبا',
+        unit: 'قطعة',
+        unitPrice: 35,
+        quantity: 150,
+        total: 5250,
+      },
+      {
+        productId: 'p-panel-12line',
+        productName: 'لوحة قواطع توزيع غاطس 12 خط فينوس باب شفاف مع بارات نحاس',
+        unit: 'قطعة',
+        unitPrice: 190,
+        quantity: 30,
+        total: 5700,
+      }
+    ],
+    total: 17750,
+    paidAmount: 17750,
+    remainingAmount: 0,
+    paymentMethod: 'cash',
+    safeId: 'safe-main',
+    notes: 'سداد نقدي فوري بالكامل من الخزينة الرئيسية'
+  }
+];
+
+// -------------------------------------------------------------
+// EXPENSES (المصروفات العامة والتشغيلية)
+// -------------------------------------------------------------
+export const INITIAL_EXPENSES: Expense[] = [
+  {
+    id: 'exp-1',
+    title: 'إيجار مقر المعرض والمخزن الرئيسي لشهر أكتوبر',
+    category: 'rent',
+    amount: 12000,
+    safeId: 'safe-main',
+    date: '2026-10-01T10:00:00Z',
+    recipient: 'الحاج فوزي (مالك العقار)',
+    notes: 'إيصال إيجار رسمي شهر أكتوبر 2026'
+  },
+  {
+    id: 'exp-2',
+    title: 'فاتورة الكهرباء والإنترنت للمحل والمخزن',
+    category: 'utilities',
+    amount: 1450,
+    safeId: 'safe-pos',
+    date: '2026-10-05T12:00:00Z',
+    recipient: 'شركة الكهرباء و WE',
+    notes: 'فاتورة الكهرباء التجارية والإنترنت فايبر'
+  },
+  {
+    id: 'exp-3',
+    title: 'نولون ومشال تفريغ شحنة كابلات السويدي',
+    category: 'transport',
+    amount: 850,
+    safeId: 'safe-pos',
+    date: '2026-10-10T14:00:00Z',
+    recipient: 'عمال المشال وسائق الشاحنة',
+    notes: 'تفريغ وتعتيق لفات الأسلاك داخل مستودع السبتية'
+  },
+  {
+    id: 'exp-4',
+    title: 'ضيافة وبوفيه ومستلزمات نظافة المعرض',
+    category: 'hospitality',
+    amount: 420,
+    safeId: 'safe-pos',
+    date: '2026-10-18T16:00:00Z',
+    recipient: 'بوفيه المعرض',
+    notes: 'شاي وقهوة وضيافة العملاء والمقاولين'
+  }
+];
+
+// -------------------------------------------------------------
+// FINANCIAL TRANSACTIONS & CASH FLOW
+// -------------------------------------------------------------
+export const INITIAL_TRANSACTIONS: FinancialTransaction[] = [
+  {
+    id: 'tx-1',
+    type: 'capital_deposit',
+    title: 'إيداع رصيد افتتاحي في الخزينة الرئيسية',
+    amount: 50000,
+    direction: 'in',
+    safeId: 'safe-main',
+    date: '2026-10-01T08:00:00Z',
+    notes: 'افتتاح الحساب المالي للمؤسسة'
+  },
+  {
+    id: 'tx-2',
+    type: 'capital_deposit',
+    title: 'إيداع رصيد تشغيلي في حساب بنك مصر',
+    amount: 150000,
+    direction: 'in',
+    safeId: 'safe-bank',
+    date: '2026-10-01T08:30:00Z',
+    notes: 'رأس مال البنك للتحويلات والاعتمادات'
+  },
+  {
+    id: 'tx-3',
+    type: 'safe_transfer',
+    title: 'تحويل عهدة نقدية من الخزينة الرئيسية إلى درج الكاشير',
+    amount: 10000,
+    direction: 'out',
+    safeId: 'safe-main',
+    date: '2026-10-01T09:00:00Z',
+    notes: 'سحب 10,000 ج.م لتغذية درج الكاشير كنقدية فكة وبداية مبيعات'
+  },
+  {
+    id: 'tx-4',
+    type: 'safe_transfer',
+    title: 'استلام عهدة نقدية من الخزينة الرئيسية لدرج الكاشير',
+    amount: 10000,
+    direction: 'in',
+    safeId: 'safe-pos',
+    date: '2026-10-01T09:05:00Z',
+    notes: 'استلام عهدة نقدية'
+  },
+  {
+    id: 'tx-5',
+    type: 'debt_collection',
+    title: 'تحصيل دفعة نقدية من حساب المقاول حسن الصاوي',
+    amount: 10000,
+    direction: 'in',
+    safeId: 'safe-pos',
+    partyType: 'customer',
+    partyId: 'cust-1',
+    partyName: 'المقاول حسن الصاوي',
+    date: '2026-10-20T10:35:00Z',
+    referenceId: 'inv-s-1001',
+    notes: 'دفعة نقدية مقبوضة بموجب فاتورة INV-2026-1001'
+  },
+  {
+    id: 'tx-6',
+    type: 'sale_income',
+    title: 'تحصيل مبيعات نقدية فاتورة INV-2026-1002 (الأسطى إبراهيم)',
+    amount: 2000,
+    direction: 'in',
+    safeId: 'safe-pos',
+    date: '2026-10-21T16:15:00Z',
+    referenceId: 'inv-s-1002',
+    notes: 'مبيعات نقدية فورية'
+  },
+  {
+    id: 'tx-7',
+    type: 'sale_income',
+    title: 'إيداع إلكتروني انستا باي فاتورة INV-2026-1003 (م/ طارق)',
+    amount: 1900,
+    direction: 'in',
+    safeId: 'safe-instapay',
+    date: '2026-10-22T12:00:00Z',
+    referenceId: 'inv-s-1003',
+    notes: 'تحويل انستا باي'
+  },
+  {
+    id: 'tx-8',
+    type: 'general_expense',
+    title: 'سداد إيجار مقر المعرض والمخزن',
+    amount: 12000,
+    direction: 'out',
+    safeId: 'safe-main',
+    date: '2026-10-01T10:00:00Z',
+    notes: 'مصروف إيجار'
+  }
+];
+
+export const INITIAL_ASSOCIATIONS: MoneyAssociation[] = [
+  {
+    id: 'assoc-1',
+    name: 'جمعية التجار والشركاء السنوية',
+    organizer: 'الحاج إبراهيم العوضي',
+    totalAmount: 100000,
+    monthlyInstallment: 10000,
+    totalMonths: 10,
+    paidMonths: 4,
+    payoutTurnMonth: 7,
+    payoutDate: '2026-07-01',
+    status: 'active',
+    safeId: 'safe-main',
+    startDate: '2026-01-01',
+    notes: 'جمعية ادخارية لشراء بضائع الصيف كابلات ومفاتيح'
+  },
+  {
+    id: 'assoc-2',
+    name: 'جمعية العائلة الرمضانية',
+    organizer: 'المهندس طارق عبد المنعم',
+    totalAmount: 30000,
+    monthlyInstallment: 3000,
+    totalMonths: 10,
+    paidMonths: 8,
+    payoutTurnMonth: 3,
+    payoutDate: '2026-03-01',
+    status: 'payout_received',
+    safeId: 'safe-main',
+    startDate: '2025-06-01',
+    notes: 'تم قبض الجمعية بالكامل وإيداعها بخزينة المعرض'
+  }
+];
+
+export const INITIAL_SAVED_AUDITS = [];
+export const INITIAL_PREVIOUSLY_AUDITED_MAP = {};
+

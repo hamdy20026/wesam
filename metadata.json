@@ -1,0 +1,6 @@
+{
+  "name": "فروزن هاوس (Frozen House) ERP - نظام إدارة المجمدات والحسابات",
+  "description": "منظومة إلكترونية متكاملة لإدارة مبيعات المجمدات، المشتريات، المخازن، الحسابات والورديات وصلاحيات المستخدمين والربط المباشر مع قاعدة بيانات XAMPP MySQL.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
